@@ -29,7 +29,7 @@ license_file = str(base_path / "COPYING")
 
 base = None
 if sys.platform == "win32":
-    base = "Win32GUI"
+    base = "gui"
 
 options = {
     "build_exe": {
