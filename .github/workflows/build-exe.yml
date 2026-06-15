@@ -44,28 +44,27 @@ jobs:
     - build
     runs-on: ubuntu-latest
     permissions:
-      contents: write  # IMPORTANT: mandatory for making GitHub Releases
-      id-token: write  # IMPORTANT: mandatory for sigstore
+      contents: write
     steps:
-    - name: Download the zipapp
+    - name: Download the built application
       uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
       with:
         name: splitguides-app
         path: dist/
-    - name: Sign the zipapp with Sigstore
-      uses: sigstore/gh-action-sigstore-python@04cffa1d795717b140764e8b640de88853c92acc # v3.3.0
-      with:
-        release-signing-artifacts: false
-        inputs: >-
-          ./dist/*.zip
-    - name: Upload artifact signature to GitHub Release
+    - name: Upload executable to GitHub release
       env:
         GITHUB_TOKEN: ${{ github.token }}
+        RELEASE_TAG: build-${{ github.sha }}
       shell: bash
-      # Upload to GitHub Release using the `gh` CLI.
-      # `dist/` contains the built packages, and the
-      # sigstore-produced signatures and certificates.
-      run: >-
-        gh release upload
-        "${GITHUB_REF_NAME}" dist/**
-        --repo "${GITHUB_REPOSITORY}"
+      run: |
+        if ! gh release view "${RELEASE_TAG}" --repo "${GITHUB_REPOSITORY}" >/dev/null 2>&1; then
+          gh release create "${RELEASE_TAG}" \
+            --repo "${GITHUB_REPOSITORY}" \
+            --target "${GITHUB_SHA}" \
+            --title "Build ${{ github.sha }}" \
+            --notes "Automated build for commit ${{ github.sha }}." \
+            --latest=false
+        fi
+        gh release upload "${RELEASE_TAG}" dist/*.zip \
+          --repo "${GITHUB_REPOSITORY}" \
+          --clobber
