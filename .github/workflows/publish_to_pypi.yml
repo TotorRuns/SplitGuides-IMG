@@ -2,6 +2,9 @@ name: Build Package
 
 on:
   push:
+  pull_request:
+  release:
+    types: [published]
 
 permissions: {}
 
@@ -33,9 +36,11 @@ jobs:
         name: python-package-distributions
         path: dist/
 
-
   github-release:
-    name: Release package distributions
+    if: github.event_name == 'release'
+    name: >-
+      Sign the Python 🐍 distribution 📦 with Sigstore
+      and upload to the GitHub Release
     needs:
     - build
     runs-on: ubuntu-latest

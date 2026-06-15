@@ -2,6 +2,7 @@ name: UnitTests
 
 on:
   push:
+  pull_request:
 
 permissions: {}
 
