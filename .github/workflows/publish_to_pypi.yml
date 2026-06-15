@@ -6,7 +6,8 @@ on:
   release:
     types: [published]
 
-permissions: {}
+permissions:
+  contents: write
 
 jobs:
   build:
