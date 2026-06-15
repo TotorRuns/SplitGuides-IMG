@@ -31,6 +31,9 @@ PERMITTED_TAGS = {
     "source",
 }
 
+PERMITTED_PROTOCOLS = {"http", "https", "file", "data"}
+
+
 PERMITTED_ATTRIBUTES = {
     "*": ["class", "style", "href"],
     "img": ["src", "alt", "width", "height"],
@@ -200,10 +203,15 @@ def get_cleaner(extra_tags, extra_attributes, extra_styles):
     # Bleach 5.0 changed how CSS works, to avoid changing internals we'll wrap around this
     valid_styles = set(bleach.css_sanitizer.ALLOWED_CSS_PROPERTIES)
     valid_styles.update(extra_styles)
-    css_sanitizer = bleach.css_sanitizer.CSSSanitizer(allowed_css_properties=valid_tags)
+    css_sanitizer = bleach.css_sanitizer.CSSSanitizer(
+        allowed_css_properties=valid_styles
+    )
 
     cleaner = bleach.sanitizer.Cleaner(
-        tags=valid_tags, attributes=valid_attributes, css_sanitizer=css_sanitizer
+        tags=valid_tags,
+        attributes=valid_attributes,
+        protocols=PERMITTED_PROTOCOLS,
+        css_sanitizer=css_sanitizer,
     )
     return cleaner
 
