@@ -4,7 +4,7 @@ from pathlib import Path
 
 from unittest.mock import patch, mock_open
 
-from splitguides.note_parser import Notes, TextProcessor
+from splitguides.note_parser import Notes, MarkdownProcessor, TextProcessor
 
 notes_base = [
     "This is the first split",
@@ -97,3 +97,29 @@ def test_from_file():
     assert isinstance(notes.preprocessor, TextProcessor)
 
     assert_notes_match(notes)
+
+
+def test_markdown_image_is_rendered_and_preserved():
+    notes = Notes(
+        StringIO("![Split route](images/route.png)"),
+        preprocessor=MarkdownProcessor(),
+    )
+
+    assert notes.render_splits(0, 1)[0] == (
+        '<p><img alt="Split route" src="images/route.png"></p>'
+    )
+
+
+def test_markdown_image_supports_file_and_data_sources():
+    notes = Notes(
+        StringIO(
+            "![Local](file:///tmp/route.png)\n"
+            "![Inline](data:image/png;base64,ZmFrZQ==)"
+        ),
+        preprocessor=MarkdownProcessor(),
+    )
+
+    result = notes.render_splits(0, 1)[0]
+
+    assert 'src="file:///tmp/route.png"' in result
+    assert 'src="data:image/png;base64,ZmFrZQ=="' in result
