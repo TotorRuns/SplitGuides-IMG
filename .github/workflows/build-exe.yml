@@ -1,6 +1,8 @@
 name: Build Exe Archive
 
 on:
+  push:
+  pull_request:
   release:
     types: [published]
 
@@ -34,6 +36,7 @@ jobs:
         path: build/SplitGuides_v*.zip
 
   add-to-github-release:
+    if: github.event_name == 'release'
     name: >-
       Sign the zipapp with Sigstore
       and upload it to GitHub Release
