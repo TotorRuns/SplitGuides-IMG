@@ -2,6 +2,7 @@ name: Test Builds
 
 on:
   push:
+  pull_request:
 
 permissions: {}
 
